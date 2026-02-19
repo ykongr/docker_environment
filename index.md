@@ -81,7 +81,7 @@ sudo docker run hello-world
 ```
 
 docker公式のテストプログラムです。\
-"Hello from Docker!"というログが確認出来たらOKです。
+`Hello from Docker!`というログが確認出来たらOKです。
 
 ### 2.2 権限の設定
 
@@ -106,12 +106,12 @@ docker run hello-world
 ```
 
 先ほどのテストプログラムをsudo抜きで実行してみます。\
-"Hello from Docker!"というログが確認出来たらOKです。
+`Hello from Docker!`というログが確認出来たらOKです。
 
 ## 3.プロジェクト作成
 
 インストールが完了したので、プロジェクトを作成します。\
-今回は、my-web-appというフォルダ名で説明します。\
+今回は、`my-web-app`というフォルダ名で説明します。\
 
 ### 3.1 フォルダ作成
 
@@ -119,13 +119,15 @@ docker run hello-world
 
 ```
 my-web-app/
-├── docker-compose.yml
-└──  app/
-    ├── Dockerfile
-    ├── requirements.txt
-    ├── main.py
-    └── templates/
-        └── index.html
+├── compose.yml
+├── app/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── main.py
+│   └── templates/
+│       └── index.html
+└── mysql/
+    └── init.sql
 
 ```
 
@@ -177,8 +179,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-
 ```
 
 データベースとアプリの二つのコンテナを連携させて起動するためのファイルです。\
@@ -320,18 +320,133 @@ INSERT INTO task (content) VALUES ('MySQL');
 プロジェクト実行のためのコマンドを説明します。
 
 ```
-docker compose up -d
+docker compose up -d --build
 ```
 
 docker composeのコンテナ実行用コマンドです。次のようなログが出ればOKです。
 
 ```
-[+] up 3/3
+[+] up 4/4
+ ✔ Image my_web_db-app       Built
  ✔ Network my_web_db_default Created
  ✔ Container my_web_db-db-1  Healthy
  ✔ Container my_web_db-app-1 Created
 ```
 
-その後、http://127.0.0.1:5000/ にアクセスすると、次のような画面が出てきます。
+二回目以降の実行時は、次のコマンドでOKです。
+
+```
+docker compose up -d
+```
+
+その後、http://127.0.0.1:5000/ にアクセスすると、次のような画面が出てきます。\
 ![alt text](image.png)\
 これで、Web+DBの2コンテナ構成環境の構築は完了です。
+
+## 5.トラブルシューティング
+
+### 5.1 コンテナが起動しない場合
+
+**症状:** `docker compose up -d` を実行してもコンテナが起動しない
+
+**対処方法:**
+
+次のコマンドを実行してログを確認します。
+
+```
+docker compose logs
+```
+
+**ポート競合エラー:** 別のプロセスが5000番や3306番ポートを使用している場合
+
+以下のようなエラーログが表示されます。
+
+```
+Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:5000 -> 0.0.0.0:0: bind: address already in use.
+```
+
+または
+
+```
+Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:3306 -> 0.0.0.0:0: bind: An attempt was made to access a socket in a way forbidden by its access permissions.
+```
+
+**対処方法:**
+
+1.既存のコンテナを停止します。
+
+```
+docker compose down
+```
+
+2.ポートが実際に使用中か確認します。
+
+Windows環境の場合：
+
+```
+netstat -ano | findstr :5000
+```
+
+ポートを使用しているプロセスID（PID）が表示されます。そのプロセスを停止してください。
+
+Linux環境の場合：
+
+```
+sudo lsof -i :5000
+```
+
+プロセスの詳細が表示されるため、不要なプロセスであれば停止してください。
+
+3.コンテナを再度起動します。
+
+```
+docker compose up -d
+```
+
+### 5.2 データベースに接続できない場合
+
+**症状:** アプリケーションエラーまたは`Can't connect to MySQL server`というエラーが表示される
+
+**対処方法:**
+
+MySQLコンテナが正常に起動しているか確認します。
+
+```
+docker compose ps
+```
+
+データベースのSTATUSが`healthy`になっていることを確認します。\
+なっていない場合、`compose.yml`のDB_HOST, DB_NAME, DB_USER, DB_PASS が正しく設定されているかを確認してください。
+
+### 5.3 Webページが表示されない場合
+
+**症状:** http://127.0.0.1:5000/ にアクセスしても接続できない
+
+**対処方法:**
+
+1 アプリケーションコンテナが起動しているか確認します。
+
+```
+docker compose ps app
+```
+
+STATUSが`Up`になっていることを確認します。
+
+2.アプリのログを確認します。
+
+```
+docker compose logs app
+```
+
+Pythonスクリプトでエラーが発生している場合、エラーメッセージが表示されます。
+
+3.ブラウザのキャッシュをクリアしてリロードしてください。
+
+### 5.4 実行し直す場合
+
+エラーに対処してコンテナを実行し直す時は次のコマンドを実行してください。
+
+```
+docker compose down -v
+docker compose up -d
+```
