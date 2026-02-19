@@ -17,43 +17,43 @@ windowsで実行している方は
 
 ### 2.1 dockerのインストールのためのコマンド
 
-```
+```bash
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
 ```
 
 古いバージョンや競合する可能性のあるパッケージを削除します。
 
-```
+```bash
 sudo apt-get update
 ```
 
 パッケージリストを最新の状態にします。
 
-```
+```bash
 sudo apt-get install ca-certificates curl
 ```
 
 curlコマンドをインストールします。
 
-```
+```bash
 sudo install -m 0755 -d /etc/apt/keyrings
 ```
 
 公式のGPGキーを保存するフォルダを作成し、権限を追加します。
 
-```
+```bash
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 ```
 
 Dockerの公式サイトからGPGキーをインストールします。
 
-```
+```bash
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 ```
 
 保存したGPGキーに読み取り権限を付与します。
 
-```
+```bash
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
@@ -62,13 +62,13 @@ echo \
 
 リポジトリに公式のDockerリポジトリを追加します。
 
-```
+```bash
 sudo apt-get update
 ```
 
 改めてパッケージリストを最新の状態にします。
 
-```
+```bash
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
@@ -76,7 +76,7 @@ docker関係のツールをまとめてインストールします。
 
 ### 動作確認
 
-```
+```bash
 sudo docker run hello-world
 ```
 
@@ -87,13 +87,13 @@ docker公式のテストプログラムです。\
 
 通常、dockerコマンドの実行にはsudoが必要になりますが、sudoなしで実行できるようにします。
 
-```
+```bash
 sudo usermod -aG docker $USER
 ```
 
 現在のユーザーをdockerグループに追加します。
 
-```
+```bash
 newgrp docker
 ```
 
@@ -101,7 +101,7 @@ newgrp docker
 
 ### 動作確認
 
-```
+```bash
 docker run hello-world
 ```
 
@@ -137,7 +137,7 @@ my-web-app/
 
 `compose.yml`
 
-```
+```yaml
 services:
   db:
     image: mysql:8.0
@@ -188,7 +188,7 @@ services:
 
 `app/Dockerfile`
 
-```
+```dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -211,7 +211,7 @@ python3.11をベースにして、アプリの実行に必要なライブラリ�
 
 `app/requirements.txt`
 
-```
+```txt
 flask
 mysqlclient
 flask-sqlalchemy
@@ -221,7 +221,7 @@ flask-sqlalchemy
 
 `app/main.py`
 
-```
+```python
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 
 `app/templates/index.html`
 
-```
+```html
 <!doctype html>
 <html>
   <head>
@@ -295,14 +295,13 @@ if __name__ == "__main__":
     </ul>
   </body>
 </html>
-
 ```
 
 今回のアプリのフロントエンド部分です。`main.py`で作成した操作を直感的に行うことができます。
 
 `mysql/init.sql`(任意)
 
-```
+```sql
 CREATE TABLE IF NOT EXISTS task (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(200) NOT NULL
@@ -450,3 +449,10 @@ Pythonスクリプトでエラーが発生している場合、エラーメッ�
 docker compose down -v
 docker compose up -d
 ```
+
+#### 参考資料
+
+https://learn.microsoft.com/ja-jp/windows/wsl/install
+https://docs.docker.com/
+
+作成したファイルは生成AIを参照
