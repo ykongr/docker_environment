@@ -1,5 +1,3 @@
-**説明開始**
-
 # Docker Composeを用いたWeb+DBの2コンテナ構成環境の構築
 
 ## はじめに
@@ -318,3 +316,22 @@ INSERT INTO task (content) VALUES ('MySQL');
 今回のアプリの初期値を設定します。設定しなくても問題ありません。
 
 ## 4.プロジェクト実行
+
+プロジェクト実行のためのコマンドを説明します。
+
+```
+docker compose up -d
+```
+
+docker composeのコンテナ実行用コマンドです。次のようなログが出ればOKです。
+
+```
+[+] up 3/3
+ ✔ Network my_web_db_default Created
+ ✔ Container my_web_db-db-1  Healthy
+ ✔ Container my_web_db-app-1 Created
+```
+
+その後、http://127.0.0.1:5000/ にアクセスすると、次のような画面が出てきます。
+![alt text](image.png)
+これで、Web+DBの2コンテナ構成環境の構築は完了です。
