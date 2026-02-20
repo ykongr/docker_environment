@@ -453,7 +453,6 @@ docker compose up -d
 #### 参考資料
 
 https://learn.microsoft.com/ja-jp/windows/wsl/install/
-
 https://docs.docker.com/
 
 作成したファイルは生成AIを参照
